@@ -3,8 +3,10 @@ use bevy::prelude::*;
 use crate::*;
 use draw::*;
 
-#[derive(Component)]
-pub struct Block;
+#[derive(Component, Debug)]
+pub struct Block {
+    pub position: BlockPos,
+}
 
 pub type BlockPos = (u8, u8);
 

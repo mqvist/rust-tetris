@@ -55,12 +55,10 @@ const TETROMINOS: [Tetromino; 7] = [
 ];
 
 #[derive(Component)]
-pub struct Piece {
-    position: BlockPos,
-}
+pub struct Falling;
 
-pub fn new_piece(mut commands: Commands, query: Query<With<Piece>>) {
-    // Do nothing if we already have a piece
+pub fn new_piece(mut commands: Commands, query: Query<With<Falling>>) {
+    // Do nothing if we already have falling blocks
     if !query.is_empty() {
         return;
     }
@@ -73,32 +71,21 @@ pub fn new_piece(mut commands: Commands, query: Query<With<Piece>>) {
         .spawn_bundle(TransformBundle { ..default() })
         .with_children(|parent| {
             for (r, c) in shape.blocks.iter() {
+                let block_row = shape.start_pos.0 + *r;
+                let block_col = shape.start_pos.1 + *c;
                 parent
-                    .spawn_bundle(new_block(
-                        shape.start_pos.0 + *r,
-                        shape.start_pos.1 + *c,
-                        shape.color,
-                    ))
-                    .insert(Block);
+                    .spawn_bundle(new_block(block_row, block_col, shape.color))
+                    .insert(Block {
+                        position: (block_row, block_col),
+                    })
+                    .insert(Falling);
             }
-        })
-        .insert(Piece {
-            position: shape.start_pos,
         });
 }
 
-pub fn move_piece_down(
-    mut commands: Commands,
-    mut query: Query<(Entity, &mut Transform, &mut Piece)>,
-) {
-    if query.is_empty() {
-        return;
-    }
-    let (piece_entity, mut piece_transform, mut piece) = query.single_mut();
-    if piece.position.0 == 1 {
-        commands.entity(piece_entity).despawn();
-    } else {
-        piece.position.0 -= 1;
-        piece_transform.translation.y -= BLOCK_SIZE;
+pub fn move_piece_down(mut query: Query<(&mut Transform, &mut Block), With<Falling>>) {
+    for (mut transform, mut block) in query.iter_mut() {
+        block.position.0 -= 1;
+        transform.translation.y -= BLOCK_SIZE;
     }
 }

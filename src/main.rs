@@ -4,6 +4,7 @@ mod block;
 mod draw;
 mod piece;
 mod playfield;
+mod stack;
 
 // General game constants
 pub const MAX_COLUMN: u8 = 10;
@@ -35,6 +36,7 @@ fn main() {
         .add_startup_system(camera_setup)
         .add_startup_system(playfield::playfield_setup)
         .add_system(piece::new_piece)
+        .add_system(stack::check_piece_collision)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIMESTEP))
