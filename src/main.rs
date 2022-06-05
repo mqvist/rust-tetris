@@ -1,12 +1,12 @@
-use bevy::{math::const_vec3, prelude::*};
+use bevy::prelude::*;
 
 // General game constants
 const MAX_COLUMN: u8 = 10;
 const MAX_ROW: u8 = 20;
 
 // Colors
-const CYAN: Color = Color::rgb(105.0 / 255.0, 227.0 / 255.0, 250.0 / 255.0);
-const BLUE: Color = Color::rgb(21.0 / 255.0, 2.0 / 255.0, 245.0 / 255.0);
+const LBLUE: Color = Color::rgb(105.0 / 255.0, 227.0 / 255.0, 250.0 / 255.0);
+const DBLUE: Color = Color::rgb(21.0 / 255.0, 2.0 / 255.0, 245.0 / 255.0);
 const ORANGE: Color = Color::rgb(238.0 / 255.0, 123.0 / 255.0, 50.0 / 255.0);
 const YELLOW: Color = Color::rgb(250.0 / 255.0, 223.0 / 255.0, 75.0 / 255.0);
 const GREEN: Color = Color::rgb(145.0 / 255.0, 250.0 / 255.0, 77.0 / 255.0);
@@ -19,25 +19,28 @@ const BLOCK_SIZE: f32 = 20.0;
 #[derive(Component)]
 struct Block;
 
-enum Tetromino {
-    I,
-    J,
-    L,
-    O,
-    S,
-    Z,
-    T,
+type BlockPos = (u8, u8);
+
+struct Tetromino {
+    block_deltas: [BlockPos; 4],
+    starting_pos: BlockPos,
+    color: Color,
 }
 
+const TETROMINOS: [Tetromino; 1] = [Tetromino {
+    // I
+    block_deltas: [(0, 0), (0, 1), (0, 2), (0, 3)],
+    starting_pos: (20, 4),
+    color: LBLUE,
+}];
+
 #[derive(Component)]
-struct Piece {
-    shape: Tetromino,
-}
+struct Piece;
 
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
-            title: "I am a window!".to_string(),
+            title: "RuST TeTRiS".to_string(),
             width: 400.,
             height: 500.,
             ..default()
@@ -54,16 +57,19 @@ fn camera_setup(mut commands: Commands) {
 }
 
 fn new_piece(mut commands: Commands) {
-    let shape = Tetromino::I;
+    let shape = &TETROMINOS[0];
 
     commands
         .spawn_bundle(TransformBundle { ..default() })
-        .insert(Piece { shape })
+        .insert(Piece)
         .with_children(|parent| {
-            parent.spawn_bundle(new_block(MAX_ROW, MAX_COLUMN, RED));
-            parent.spawn_bundle(new_block(MAX_ROW, 1, GREEN));
-            parent.spawn_bundle(new_block(1, MAX_COLUMN, BLUE));
-            parent.spawn_bundle(new_block(1, 1, YELLOW));
+            for (r, c) in shape.block_deltas.iter() {
+                parent.spawn_bundle(new_block(
+                    shape.starting_pos.0 + *r,
+                    shape.starting_pos.1 + *c,
+                    shape.color,
+                ));
+            }
         });
 }
 
