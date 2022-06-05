@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::*;
 
 #[derive(Component)]
@@ -11,7 +13,7 @@ struct Tetromino {
     color: Color,
 }
 
-const TETROMINOS: [Tetromino; 2] = [
+const TETROMINOS: [Tetromino; 7] = [
     // I
     Tetromino {
         blocks: [(0, 0), (0, 1), (0, 2), (0, 3)],
@@ -24,6 +26,36 @@ const TETROMINOS: [Tetromino; 2] = [
         start_pos: (21, 4),
         color: DBLUE,
     },
+    // L
+    Tetromino {
+        blocks: [(0, 0), (0, 1), (0, 2), (1, 2)],
+        start_pos: (21, 4),
+        color: ORANGE,
+    },
+    // O
+    Tetromino {
+        blocks: [(0, 0), (1, 0), (0, 1), (1, 1)],
+        start_pos: (21, 5),
+        color: YELLOW,
+    },
+    // S
+    Tetromino {
+        blocks: [(0, 0), (0, 1), (1, 1), (1, 2)],
+        start_pos: (21, 4),
+        color: GREEN,
+    },
+    // Z
+    Tetromino {
+        blocks: [(1, 0), (1, 1), (0, 1), (0, 2)],
+        start_pos: (21, 4),
+        color: RED,
+    },
+    // T
+    Tetromino {
+        blocks: [(0, 0), (0, 1), (1, 1), (0, 2)],
+        start_pos: (21, 4),
+        color: MAGENTA,
+    },
 ];
 
 #[derive(Component)]
@@ -31,8 +63,15 @@ pub struct Piece {
     position: BlockPos,
 }
 
-pub fn new_piece(mut commands: Commands) {
-    let shape = &TETROMINOS[1];
+pub fn new_piece(mut commands: Commands, query: Query<With<Piece>>) {
+    // Do nothing if we already have a piece
+    if !query.is_empty() {
+        return;
+    }
+
+    // Pick a random tetromino to spawn
+    let mut rng = rand::thread_rng();
+    let shape = &TETROMINOS[rng.gen_range(0..TETROMINOS.len())];
 
     commands
         .spawn_bundle(TransformBundle { ..default() })
