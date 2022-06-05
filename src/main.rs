@@ -5,6 +5,7 @@ const MAX_COLUMN: u8 = 10;
 const MAX_ROW: u8 = 20;
 
 // Colors
+const WHITE: Color = Color::rgb(1.0, 1.0, 1.0);
 const LBLUE: Color = Color::rgb(105.0 / 255.0, 227.0 / 255.0, 250.0 / 255.0);
 const DBLUE: Color = Color::rgb(21.0 / 255.0, 2.0 / 255.0, 245.0 / 255.0);
 const ORANGE: Color = Color::rgb(238.0 / 255.0, 123.0 / 255.0, 50.0 / 255.0);
@@ -21,18 +22,34 @@ struct Block;
 
 type BlockPos = (u8, u8);
 
+// Walls
+enum WallSide {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
 struct Tetromino {
     block_deltas: [BlockPos; 4],
     starting_pos: BlockPos,
     color: Color,
 }
 
-const TETROMINOS: [Tetromino; 1] = [Tetromino {
+const TETROMINOS: [Tetromino; 2] = [
     // I
-    block_deltas: [(0, 0), (0, 1), (0, 2), (0, 3)],
-    starting_pos: (20, 4),
-    color: LBLUE,
-}];
+    Tetromino {
+        block_deltas: [(0, 0), (0, 1), (0, 2), (0, 3)],
+        starting_pos: (20, 4),
+        color: LBLUE,
+    },
+    // J
+    Tetromino {
+        block_deltas: [(1, 0), (0, 0), (0, 1), (0, 2)],
+        starting_pos: (20, 4),
+        color: DBLUE,
+    },
+];
 
 #[derive(Component)]
 struct Piece;
@@ -47,6 +64,7 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_startup_system(camera_setup)
+        .add_startup_system(gamearea_setup)
         .add_startup_system(new_piece)
         .run();
 }
@@ -56,21 +74,59 @@ fn camera_setup(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
 }
 
+fn gamearea_setup(mut commands: Commands) {
+    commands.spawn_bundle(new_wall(WallSide::Left));
+    commands.spawn_bundle(new_wall(WallSide::Right));
+    commands.spawn_bundle(new_wall(WallSide::Top));
+    commands.spawn_bundle(new_wall(WallSide::Bottom));
+}
+
+fn new_wall(side: WallSide) -> SpriteBundle {
+    let left_edge = col_to_x(1) - BLOCK_SIZE / 2.0;
+    let top_edge = row_to_y(MAX_ROW + 1) - BLOCK_SIZE / 2.0;
+    let right_edge = col_to_x(MAX_COLUMN) + BLOCK_SIZE / 2.0;
+    let bottom_edge = row_to_y(0) + BLOCK_SIZE / 2.0;
+    let playfield_height = MAX_ROW as f32 * BLOCK_SIZE;
+    let playfield_width = MAX_COLUMN as f32 * BLOCK_SIZE;
+
+    let (x, y, sx, sy) = match side {
+        WallSide::Left => (left_edge, 0.0, 1.0, playfield_height),
+        WallSide::Right => (right_edge, 0.0, 1.0, playfield_height),
+        WallSide::Top => (0.0, top_edge, playfield_width, 1.0),
+        WallSide::Bottom => (0.0, bottom_edge, playfield_width, 1.0),
+    };
+
+    SpriteBundle {
+        transform: Transform {
+            translation: Vec3::new(x, y, 0.0),
+            scale: Vec3::new(sx, sy, 0.0),
+            ..default()
+        },
+        sprite: Sprite {
+            color: WHITE,
+            ..default()
+        },
+        ..default()
+    }
+}
+
 fn new_piece(mut commands: Commands) {
-    let shape = &TETROMINOS[0];
+    let shape = &TETROMINOS[1];
 
     commands
         .spawn_bundle(TransformBundle { ..default() })
-        .insert(Piece)
         .with_children(|parent| {
             for (r, c) in shape.block_deltas.iter() {
-                parent.spawn_bundle(new_block(
-                    shape.starting_pos.0 + *r,
-                    shape.starting_pos.1 + *c,
-                    shape.color,
-                ));
+                parent
+                    .spawn_bundle(new_block(
+                        shape.starting_pos.0 + *r,
+                        shape.starting_pos.1 + *c,
+                        shape.color,
+                    ))
+                    .insert(Block);
             }
-        });
+        })
+        .insert(Piece);
 }
 
 fn new_block(row: u8, col: u8, color: Color) -> SpriteBundle {
@@ -88,11 +144,9 @@ fn new_block(row: u8, col: u8, color: Color) -> SpriteBundle {
 }
 
 fn row_to_y(row: u8) -> f32 {
-    assert!(row > 0 && row <= MAX_ROW);
     BLOCK_SIZE * (row as f32 - (MAX_ROW + 1) as f32 / 2.0)
 }
 
 fn col_to_x(col: u8) -> f32 {
-    assert!(col > 0 && col <= MAX_COLUMN);
     BLOCK_SIZE * (col as f32 - (MAX_COLUMN + 1) as f32 / 2.0)
 }
