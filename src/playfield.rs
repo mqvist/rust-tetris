@@ -1,5 +1,7 @@
 use crate::*;
 
+use draw::*;
+
 // Size of the playfield
 const PLAYFIELD_WIDTH: f32 = BLOCK_SIZE * MAX_COLUMN as f32;
 const PLAYFIELD_HEIGHT: f32 = BLOCK_SIZE * MAX_ROW as f32;

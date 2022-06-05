@@ -1,13 +1,15 @@
 use bevy::{core::FixedTimestep, prelude::*};
 
+mod block;
+mod draw;
 mod piece;
 mod playfield;
 
 // General game constants
-const MAX_COLUMN: u8 = 10;
-const MAX_ROW: u8 = 20;
+pub const MAX_COLUMN: u8 = 10;
+pub const MAX_ROW: u8 = 20;
 // Size of a tetromino building block
-const BLOCK_SIZE: f32 = 20.0;
+pub const BLOCK_SIZE: f32 = 20.0;
 
 const TIMESTEP: f64 = 60.0 / 1000.0;
 
@@ -44,24 +46,4 @@ fn main() {
 fn camera_setup(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
-}
-
-fn new_rect(x: f32, y: f32, width: f32, height: f32, color: Color) -> SpriteBundle {
-    SpriteBundle {
-        transform: Transform {
-            translation: Vec3::new(x, y, 0.0),
-            scale: Vec3::new(width, height, 0.0),
-            ..default()
-        },
-        sprite: Sprite { color, ..default() },
-        ..default()
-    }
-}
-
-fn row_to_y(row: u8) -> f32 {
-    BLOCK_SIZE * (row as f32 - (MAX_ROW + 1) as f32 / 2.0)
-}
-
-fn col_to_x(col: u8) -> f32 {
-    BLOCK_SIZE * (col as f32 - (MAX_COLUMN + 1) as f32 / 2.0)
 }

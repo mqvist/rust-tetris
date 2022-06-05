@@ -1,11 +1,7 @@
 use rand::Rng;
 
 use crate::*;
-
-#[derive(Component)]
-struct Block;
-
-type BlockPos = (u8, u8);
+use block::*;
 
 struct Tetromino {
     blocks: [BlockPos; 4],
@@ -91,12 +87,6 @@ pub fn new_piece(mut commands: Commands, query: Query<With<Piece>>) {
         });
 }
 
-fn new_block(row: u8, col: u8, color: Color) -> SpriteBundle {
-    let x = col_to_x(col);
-    let y = row_to_y(row);
-    new_rect(x, y, BLOCK_SIZE, BLOCK_SIZE, color)
-}
-
 pub fn move_piece_down(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut Piece)>,
@@ -105,7 +95,6 @@ pub fn move_piece_down(
         return;
     }
     let (piece_entity, mut piece_transform, mut piece) = query.single_mut();
-    //println!("{:?}", piece_transform);
     if piece.position.0 == 1 {
         commands.entity(piece_entity).despawn();
     } else {
