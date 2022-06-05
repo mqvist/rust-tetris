@@ -36,6 +36,12 @@ struct Piece {
 
 fn main() {
     App::new()
+        .insert_resource(WindowDescriptor {
+            title: "I am a window!".to_string(),
+            width: 400.,
+            height: 500.,
+            ..default()
+        })
         .add_plugins(DefaultPlugins)
         .add_startup_system(camera_setup)
         .add_startup_system(new_piece)
