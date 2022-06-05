@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{core::FixedTimestep, prelude::*};
 
 mod piece;
 mod playfield;
@@ -8,6 +8,8 @@ const MAX_COLUMN: u8 = 10;
 const MAX_ROW: u8 = 20;
 // Size of a tetromino building block
 const BLOCK_SIZE: f32 = 20.0;
+
+const TIMESTEP: f64 = 60.0 / 1000.0;
 
 // Colors
 const WHITE: Color = Color::rgb(1.0, 1.0, 1.0);
@@ -31,6 +33,11 @@ fn main() {
         .add_startup_system(camera_setup)
         .add_startup_system(playfield::playfield_setup)
         .add_startup_system(piece::new_piece)
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(TIMESTEP))
+                .with_system(piece::move_piece_down),
+        )
         .run();
 }
 
