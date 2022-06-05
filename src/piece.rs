@@ -83,6 +83,22 @@ pub fn new_piece(mut commands: Commands, query: Query<With<Falling>>) {
         });
 }
 
+pub fn move_piece(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&mut Transform, &mut Block), With<Falling>>,
+) {
+    let mut direction = 0;
+    if keyboard_input.just_pressed(KeyCode::Left) {
+        direction = -1;
+    } else if keyboard_input.just_pressed(KeyCode::Right) {
+        direction = 1;
+    }
+    for (mut transform, mut block) in query.iter_mut() {
+        block.position.1 += direction;
+        transform.translation.x += BLOCK_SIZE * direction as f32;
+    }
+}
+
 pub fn move_piece_down(mut query: Query<(&mut Transform, &mut Block), With<Falling>>) {
     for (mut transform, mut block) in query.iter_mut() {
         block.position.0 -= 1;

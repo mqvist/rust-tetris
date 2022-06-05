@@ -36,6 +36,7 @@ fn main() {
         .add_startup_system(camera_setup)
         .add_startup_system(playfield::playfield_setup)
         .add_system(piece::new_piece)
+        .add_system(piece::move_piece)
         .add_system(stack::check_piece_collision)
         .add_system_set(
             SystemSet::new()
