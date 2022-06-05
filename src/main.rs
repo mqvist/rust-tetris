@@ -83,10 +83,10 @@ fn new_block(row: u8, col: u8, color: Color) -> SpriteBundle {
 
 fn row_to_y(row: u8) -> f32 {
     assert!(row > 0 && row <= MAX_ROW);
-    BLOCK_SIZE * (row as f32 - MAX_ROW as f32 / 2.0)
+    BLOCK_SIZE * (row as f32 - (MAX_ROW + 1) as f32 / 2.0)
 }
 
 fn col_to_x(col: u8) -> f32 {
     assert!(col > 0 && col <= MAX_COLUMN);
-    BLOCK_SIZE * (col as f32 - MAX_COLUMN as f32 / 2.0)
+    BLOCK_SIZE * (col as f32 - (MAX_COLUMN + 1) as f32 / 2.0)
 }
