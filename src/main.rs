@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+mod playfield;
+
 // General game constants
 const MAX_COLUMN: u8 = 10;
 const MAX_ROW: u8 = 20;
@@ -21,14 +23,6 @@ const BLOCK_SIZE: f32 = 20.0;
 struct Block;
 
 type BlockPos = (u8, u8);
-
-// Walls
-enum WallSide {
-    Left,
-    Right,
-    Top,
-    Bottom,
-}
 
 struct Tetromino {
     blocks: [BlockPos; 4],
@@ -64,7 +58,7 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_startup_system(camera_setup)
-        .add_startup_system(gamearea_setup)
+        .add_startup_system(playfield::playfield_setup)
         .add_startup_system(new_piece)
         .run();
 }
@@ -72,31 +66,6 @@ fn main() {
 fn camera_setup(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
-}
-
-fn gamearea_setup(mut commands: Commands) {
-    commands.spawn_bundle(new_wall(WallSide::Left));
-    commands.spawn_bundle(new_wall(WallSide::Right));
-    commands.spawn_bundle(new_wall(WallSide::Top));
-    commands.spawn_bundle(new_wall(WallSide::Bottom));
-}
-
-fn new_wall(side: WallSide) -> SpriteBundle {
-    let left_edge = col_to_x(1) - BLOCK_SIZE / 2.0;
-    let top_edge = row_to_y(MAX_ROW + 1) - BLOCK_SIZE / 2.0;
-    let right_edge = col_to_x(MAX_COLUMN) + BLOCK_SIZE / 2.0;
-    let bottom_edge = row_to_y(0) + BLOCK_SIZE / 2.0;
-    let playfield_height = MAX_ROW as f32 * BLOCK_SIZE;
-    let playfield_width = MAX_COLUMN as f32 * BLOCK_SIZE;
-
-    let (x, y, width, height) = match side {
-        WallSide::Left => (left_edge, 0.0, 1.0, playfield_height),
-        WallSide::Right => (right_edge, 0.0, 1.0, playfield_height),
-        WallSide::Top => (0.0, top_edge, playfield_width, 1.0),
-        WallSide::Bottom => (0.0, bottom_edge, playfield_width, 1.0),
-    };
-
-    new_rect(x, y, width, height, WHITE)
 }
 
 fn new_piece(mut commands: Commands) {
